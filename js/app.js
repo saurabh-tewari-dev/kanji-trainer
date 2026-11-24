@@ -257,6 +257,16 @@
     });
   }
 
+  function prepareVocabMeanings(number, words) {
+    const key = String(number);
+    if (hiddenMeanings[key]) return;
+    const map = {};
+    words.forEach(function (_, index) {
+      map[index] = true;
+    });
+    hiddenMeanings[key] = map;
+  }
+
   const hiddenKanji = {};
 
   function kanjiMap(number) {
@@ -298,6 +308,16 @@
       if (hide) map[key] = true;
       else delete map[key];
     });
+  }
+
+  function prepareLessonMeanings(number, content) {
+    const key = String(number);
+    if (hiddenKanji[key]) return;
+    const map = {};
+    lessonMeaningKeys(content).forEach(function (item) {
+      map[item] = true;
+    });
+    hiddenKanji[key] = map;
   }
 
   function renderVocabChapter(number) {
@@ -351,6 +371,7 @@
     }
     setNav("vocabulary");
     document.title = "Chapter " + number + " words · Kanji Trainer";
+    prepareVocabMeanings(number, words);
     const list = el("ul", { class: "vocab-list" });
     const meaningsHidden = allMeaningsHidden(number, words);
     const allButton = el("button", {
@@ -626,6 +647,7 @@
       return;
     }
     setNav("lessons");
+    prepareLessonMeanings(number, content);
     let index = 0;
 
     function draw() {
