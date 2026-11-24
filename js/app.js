@@ -59,6 +59,17 @@
     return copy;
   }
 
+  function soundButton(label, reading) {
+    return el("button", {
+      type: "button",
+      class: "play",
+      "aria-label": "Play " + label,
+      onclick: function () {
+        speak(reading);
+      },
+    });
+  }
+
   function speak(text) {
     if (!window.speechSynthesis) return;
     const utterance = new SpeechSynthesisUtterance(text);
@@ -149,7 +160,7 @@
         el("p", { class: "lede", text: "The まとめ quizzes stay out of the lesson list. Each one asks for the reading, then the kanji. Answers stay hidden until the end." }),
       ]),
       list,
-      el("p", { class: "footnote", text: "There is no review sheet for lessons 16–18 in the folder." })
+      el("p", { class: "footnote", text: "Lessons 19 and 20 still have no lesson file." })
     );
   }
 
@@ -220,6 +231,75 @@
     );
   }
 
+  const hiddenMeanings = {};
+
+  function hiddenMap(number) {
+    const key = String(number);
+    if (!hiddenMeanings[key]) hiddenMeanings[key] = {};
+    return hiddenMeanings[key];
+  }
+
+  function meaningHidden(number, index) {
+    return !!hiddenMap(number)[index];
+  }
+
+  function allMeaningsHidden(number, words) {
+    return words.every(function (_, index) {
+      return meaningHidden(number, index);
+    });
+  }
+
+  function setAllMeanings(number, words, hide) {
+    const map = hiddenMap(number);
+    words.forEach(function (_, index) {
+      if (hide) map[index] = true;
+      else delete map[index];
+    });
+  }
+
+  const hiddenKanji = {};
+
+  function kanjiMap(number) {
+    const key = String(number);
+    if (!hiddenKanji[key]) hiddenKanji[key] = {};
+    return hiddenKanji[key];
+  }
+
+  function glossKey(cardIndex) {
+    return "g:" + cardIndex;
+  }
+
+  function wordKey(cardIndex, wordIndex) {
+    return "w:" + cardIndex + ":" + wordIndex;
+  }
+
+  function lessonMeaningKeys(content) {
+    const keys = [];
+    content.kanji.forEach(function (card, cardIndex) {
+      keys.push(glossKey(cardIndex));
+      card.words.forEach(function (_, wordIndex) {
+        keys.push(wordKey(cardIndex, wordIndex));
+      });
+    });
+    return keys;
+  }
+
+  function cardMeaningsHidden(number, cardIndex, card) {
+    const map = kanjiMap(number);
+    if (!map[glossKey(cardIndex)]) return false;
+    return card.words.every(function (_, wordIndex) {
+      return !!map[wordKey(cardIndex, wordIndex)];
+    });
+  }
+
+  function setLessonMeanings(number, content, hide) {
+    const map = kanjiMap(number);
+    lessonMeaningKeys(content).forEach(function (key) {
+      if (hide) map[key] = true;
+      else delete map[key];
+    });
+  }
+
   function renderVocabChapter(number) {
     const words = vocabChapter(number);
     if (!words) {
@@ -272,20 +352,56 @@
     setNav("vocabulary");
     document.title = "Chapter " + number + " words · Kanji Trainer";
     const list = el("ul", { class: "vocab-list" });
-    words.forEach(function (item) {
+    const meaningsHidden = allMeaningsHidden(number, words);
+    const allButton = el("button", {
+      type: "button",
+      class: "meaning-all",
+      "aria-pressed": meaningsHidden ? "true" : "false",
+      text: meaningsHidden ? "Show all meanings" : "Hide all meanings",
+      onclick: function () {
+        const top = window.scrollY;
+        setAllMeanings(number, words, !allMeaningsHidden(number, words));
+        renderVocabStudy(number);
+        window.scrollTo(0, top);
+      },
+    });
+    function syncAllButton() {
+      const everyHidden = allMeaningsHidden(number, words);
+      allButton.textContent = everyHidden ? "Show all meanings" : "Hide all meanings";
+      allButton.setAttribute("aria-pressed", everyHidden ? "true" : "false");
+    }
+    words.forEach(function (item, index) {
+      const hidden = meaningHidden(number, index);
+      const meaning = el("span", {
+        class: "vocab-meaning" + (hidden ? " is-hidden" : ""),
+        text: hidden ? "" : item.meaning,
+      });
+      const toggle = el("button", {
+        type: "button",
+        class: "meaning-toggle",
+        "aria-pressed": hidden ? "true" : "false",
+        "aria-label": (hidden ? "Show" : "Hide") + " the meaning of " + item.word,
+        text: hidden ? "Show" : "Hide",
+        onclick: function () {
+          const map = hiddenMap(number);
+          if (map[index]) delete map[index];
+          else map[index] = true;
+          const nowHidden = !!map[index];
+          meaning.textContent = nowHidden ? "" : item.meaning;
+          meaning.classList.toggle("is-hidden", nowHidden);
+          toggle.textContent = nowHidden ? "Show" : "Hide";
+          toggle.setAttribute("aria-pressed", nowHidden ? "true" : "false");
+          toggle.setAttribute("aria-label", (nowHidden ? "Show" : "Hide") + " the meaning of " + item.word);
+          syncAllButton();
+        },
+      });
       list.append(
         el("li", {}, [
           el("span", { class: "jp word-jp", text: item.word }),
           el("span", { class: "jp vocab-read", text: item.reading }),
-          el("span", { class: "vocab-meaning", text: item.meaning }),
-          el("button", {
-            type: "button",
-            class: "play",
-            text: "Play",
-            onclick: function () {
-              speak(item.reading || item.word);
-            },
-          }),
+          meaning,
+          toggle,
+          soundButton(item.word, item.reading || item.word),
         ])
       );
     });
@@ -296,6 +412,7 @@
         el("p", { class: "eyebrow", text: "Chapter " + number }),
         el("h1", { text: "Study the words" }),
       ]),
+      el("div", { class: "meaning-bar" }, [allButton]),
       list
     );
   }
@@ -520,32 +637,94 @@
       if (card.on.length) {
         readings.append(el("dt", { text: "On" }), el("dd", { class: "jp", text: card.on.join("、") }));
       }
+      const map = kanjiMap(number);
+      const glossHidden = !!map[glossKey(index)];
+      const gloss = el("p", {
+        class: "study-mean" + (glossHidden ? " is-hidden" : ""),
+        text: glossHidden ? "" : card.meaning,
+      });
+      const glossToggle = el("button", {
+        type: "button",
+        class: "meaning-toggle",
+        "aria-pressed": glossHidden ? "true" : "false",
+        "aria-label": (glossHidden ? "Show" : "Hide") + " the meaning of " + card.character,
+        text: glossHidden ? "Show" : "Hide",
+        onclick: function () {
+          const key = glossKey(index);
+          if (map[key]) delete map[key];
+          else map[key] = true;
+          const nowHidden = !!map[key];
+          gloss.textContent = nowHidden ? "" : card.meaning;
+          gloss.classList.toggle("is-hidden", nowHidden);
+          glossToggle.textContent = nowHidden ? "Show" : "Hide";
+          glossToggle.setAttribute("aria-pressed", nowHidden ? "true" : "false");
+          glossToggle.setAttribute("aria-label", (nowHidden ? "Show" : "Hide") + " the meaning of " + card.character);
+          syncAllButton();
+        },
+      });
       const words = el("ul", { class: "words" });
-      card.words.forEach(function (word) {
+      card.words.forEach(function (word, wordIndex) {
+        const hidden = !!map[wordKey(index, wordIndex)];
+        const meaning = el("span", {
+          class: "word-mean" + (hidden ? " is-hidden" : ""),
+          text: hidden ? "" : word.meaning,
+        });
+        const toggle = el("button", {
+          type: "button",
+          class: "meaning-toggle",
+          "aria-pressed": hidden ? "true" : "false",
+          "aria-label": (hidden ? "Show" : "Hide") + " the meaning of " + word.word,
+          text: hidden ? "Show" : "Hide",
+          onclick: function () {
+            const key = wordKey(index, wordIndex);
+            if (map[key]) delete map[key];
+            else map[key] = true;
+            const nowHidden = !!map[key];
+            meaning.textContent = nowHidden ? "" : word.meaning;
+            meaning.classList.toggle("is-hidden", nowHidden);
+            toggle.textContent = nowHidden ? "Show" : "Hide";
+            toggle.setAttribute("aria-pressed", nowHidden ? "true" : "false");
+            toggle.setAttribute("aria-label", (nowHidden ? "Show" : "Hide") + " the meaning of " + word.word);
+            syncAllButton();
+          },
+        });
         words.append(
           el("li", {}, [
             el("span", { class: "word-jp jp", text: word.word }),
             el("span", { class: "word-read", text: word.reading }),
-            el("span", { class: "word-mean", text: word.meaning }),
-            el("button", {
-              type: "button",
-              class: "play",
-              text: "Play",
-              "aria-label": "Play " + word.word,
-              onclick: function () {
-                speak(word.reading);
-              },
-            }),
+            meaning,
+            toggle,
+            soundButton(word.word, word.reading),
           ])
         );
       });
+      const cardIndex = index;
+      const meaningsHidden = cardMeaningsHidden(number, cardIndex, card);
+      const allButton = el("button", {
+        type: "button",
+        class: "meaning-all",
+        "aria-pressed": meaningsHidden ? "true" : "false",
+        text: meaningsHidden ? "Show all meanings" : "Hide all meanings",
+        onclick: function () {
+          const top = window.scrollY;
+          setLessonMeanings(number, content, !cardMeaningsHidden(number, cardIndex, card));
+          draw();
+          window.scrollTo(0, top);
+        },
+      });
+      function syncAllButton() {
+        const everyHidden = cardMeaningsHidden(number, cardIndex, card);
+        allButton.textContent = everyHidden ? "Show all meanings" : "Hide all meanings";
+        allButton.setAttribute("aria-pressed", everyHidden ? "true" : "false");
+      }
       clear(main);
       main.append(
         el("a", { class: "back", href: "#/lesson/" + number, text: "Lesson " + number }),
         el("p", { class: "progress", text: index + 1 + " / " + content.kanji.length + "  ·  #" + card.entry }),
+        el("div", { class: "meaning-bar" }, [allButton]),
         el("article", { class: "study-card" }, [
           el("p", { class: "study-char jp", text: card.character }),
-          el("p", { class: "study-mean", text: card.meaning }),
+          el("div", { class: "study-mean-row" }, [gloss, glossToggle]),
           readings,
           el("p", { class: "strokes", text: card.strokes + " strokes" }),
           el("p", { class: "mnemonic", text: card.mnemonic }),

@@ -215,10 +215,25 @@ a.index-row:hover, a.activity:hover { border-color: #c8b8a6; }
   text-align: center;
 }
 
-.study-mean {
+.study-mean-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
   margin: 0.4rem 0 0.9rem;
+}
+
+.study-mean {
+  margin: 0;
+  min-width: 0;
   text-align: center;
   font-size: 1.2rem;
+}
+
+.study-mean.is-hidden,
+.word-mean.is-hidden {
+  min-height: 1.2em;
+  min-width: 1.2em;
 }
 
 .readings {
@@ -237,33 +252,93 @@ a.index-row:hover, a.activity:hover { border-color: #c8b8a6; }
 
 .vocab-list li {
   display: grid;
-  grid-template-columns: minmax(7rem, 1.3fr) minmax(7rem, 1.1fr) 2fr auto;
+  grid-template-columns: minmax(6.5rem, 1.15fr) minmax(6.5rem, 1fr) minmax(0, 1.7fr) auto auto;
   gap: 0.35rem 0.75rem;
   align-items: center;
   padding: 0.55rem 0;
   border-top: 1px solid var(--line);
 }
 
-.vocab-meaning { color: var(--muted); }
+.vocab-meaning { color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+
+.vocab-meaning.is-hidden {
+  min-height: 1.2em;
+}
+
+.meaning-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin: -0.4rem 0 0.9rem;
+}
+
+.meaning-all {
+  min-height: 2.75rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.92rem;
+  text-align: center;
+  touch-action: manipulation;
+}
+
+.meaning-all[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.meaning-toggle {
+  justify-self: end;
+  min-width: 4.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 0.85rem;
+  touch-action: manipulation;
+}
+
+.meaning-toggle[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
 
 .words { display: grid; gap: 0.45rem; margin-top: 0.8rem; }
 
 .words li {
   display: grid;
-  grid-template-columns: 7rem 8rem 1fr auto;
-  gap: 0.4rem;
+  grid-template-columns: minmax(5.5rem, 7rem) minmax(6rem, 8rem) minmax(0, 1fr) auto auto;
+  gap: 0.4rem 0.75rem;
   align-items: center;
   padding-top: 0.4rem;
   border-top: 1px solid var(--line);
 }
 
-.play {
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
+.word-mean { min-width: 0; overflow-wrap: anywhere; }
+
+.word-jp {
+  min-width: 0;
+  font-size: 1.15rem;
+  overflow-wrap: anywhere;
 }
 
-.word-jp { font-size: 1.15rem; }
+.play {
+  justify-self: end;
+  align-self: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border-radius: 999px;
+  background-color: var(--card);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231c1714' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 5 6 9H3v6h3l5 4V5z'/%3E%3Cpath d='M15.5 8.5a5 5 0 0 1 0 7'/%3E%3Cpath d='M18.5 6a8 8 0 0 1 0 12'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.35rem 1.35rem;
+  touch-action: manipulation;
+}
+
+.play:active { background-color: var(--accent-soft); }
 
 .progress { margin-bottom: 0.8rem; }
 
@@ -401,9 +476,29 @@ button:focus-visible, a:focus-visible {
   .nav { width: 100%; }
   .nav a { padding-inline: 0.55rem; }
   .study-char { font-size: 5.2rem; }
-  .words li, .vocab-list li { grid-template-columns: 1fr auto; }
-  .vocab-read, .vocab-meaning { grid-column: 1 / -1; }
-  .word-read, .word-mean { grid-column: 1 / -1; }
+  .words li, .vocab-list li {
+    align-items: center;
+    column-gap: 0.75rem;
+  }
+  .words li {
+    grid-template-columns: minmax(0, 1fr) auto 2.75rem;
+    grid-template-areas:
+      "word word play"
+      "read read play"
+      "mean toggle play";
+  }
+  .vocab-list li {
+    grid-template-columns: minmax(0, 1fr) auto 2.75rem;
+    grid-template-areas:
+      "word word play"
+      "read read play"
+      "mean toggle play";
+  }
+  .word-jp { grid-area: word; align-self: center; }
+  .vocab-read, .word-read { grid-area: read; }
+  .vocab-meaning, .word-mean { grid-area: mean; }
+  .meaning-toggle { grid-area: toggle; }
+  .play { grid-area: play; }
   .page-head h1 { font-size: 2rem; }
   .index-row, .activity { grid-template-columns: auto 1fr; }
   .pill, .activity-meta { grid-column: 2; justify-self: start; }

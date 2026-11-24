@@ -27,6 +27,7 @@ window.DATA = {
     { id: "7-9", title: "Lessons 7–9", status: "soon" },
     { id: "10-12", title: "Lessons 10–12", status: "soon" },
     { id: "13-15", title: "Lessons 13–15", status: "soon" },
+    { id: "16-18", title: "Lessons 16–18", status: "soon" },
   ],
   vocabularyChapters: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
   // A book page is stored once. The scan often repeats a page: the last page of one PDF
@@ -42,6 +43,8 @@ window.DATA = {
     { page: "Review 7–9, question set 2", keepIn: "review 7–9", repeatedOn: "Lesson 10 file, first page, left side" },
     { page: "Review 13–15, question set 2", keepIn: "review 13–15", repeatedOn: "Lesson 16 file, first page, left side" },
     { page: "Lesson 16 opening", keepIn: "lesson 16", repeatedOn: "Lessons 13–15 review, last page, right side" },
+    { page: "Lesson 18, 練習2", keepIn: "lesson 18", repeatedOn: "Lessons 16–18 review, first page, left side" },
+    { page: "Lesson 19 opening", keepIn: "lesson 19", repeatedOn: "Lessons 16–18 review, last page, right side" },
   ],
   lessonContent: {
     1: {

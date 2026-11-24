@@ -9892,7 +9892,112 @@ window.LESSON_REST = {
         "answer": "おしえて"
       }
     ],
-    "practice2": []
+    "practice2": [
+      {
+        "reading": "かんじ",
+        "meaning": "Chinese character",
+        "before": "",
+        "after": "",
+        "choices": ["漢字", "文字", "数字", "英文"],
+        "answer": "漢字"
+      },
+      {
+        "reading": "ぶん",
+        "meaning": "sentence",
+        "before": "",
+        "after": "",
+        "choices": ["文", "字", "英", "教"],
+        "answer": "文"
+      },
+      {
+        "reading": "きょうしつ",
+        "meaning": "classroom",
+        "before": "",
+        "after": "",
+        "choices": ["教室", "教科書", "研究室", "英語"],
+        "answer": "教室"
+      },
+      {
+        "reading": "べんきょう",
+        "meaning": "study",
+        "before": "",
+        "after": "",
+        "choices": ["勉強", "研究", "練習", "教室"],
+        "answer": "勉強"
+      },
+      {
+        "reading": "かんが",
+        "meaning": "to think",
+        "before": "",
+        "after": "えます",
+        "choices": ["考", "教", "習", "研"],
+        "answer": "考"
+      },
+      {
+        "reading": "ちゅうもん",
+        "meaning": "to order",
+        "before": "",
+        "after": "します",
+        "choices": ["注文", "文章", "漢字", "文学"],
+        "answer": "注文"
+      },
+      {
+        "reading": "きょうかしょ",
+        "meaning": "textbook",
+        "before": "",
+        "after": "",
+        "choices": ["教科書", "教室", "参考書", "研究室"],
+        "answer": "教科書"
+      },
+      {
+        "reading": "しゅう",
+        "meaning": "to practice",
+        "before": "練",
+        "after": "します",
+        "choices": ["習", "教", "考", "研"],
+        "answer": "習"
+      },
+      {
+        "reading": "けんきゅう",
+        "meaning": "to research",
+        "before": "",
+        "after": "します",
+        "choices": ["研究", "勉強", "練習", "教室"],
+        "answer": "研究"
+      },
+      {
+        "reading": "えいご",
+        "meaning": "English",
+        "before": "小学校から",
+        "after": "を習っています",
+        "choices": ["英語", "英国", "英雄", "漢字"],
+        "answer": "英語"
+      },
+      {
+        "reading": "なら",
+        "meaning": "to learn",
+        "before": "小学校から英語を",
+        "after": "っています",
+        "choices": ["習", "教", "考", "研"],
+        "answer": "習"
+      },
+      {
+        "reading": "ぶんがく",
+        "meaning": "literature",
+        "before": "大学で",
+        "after": "を教えています",
+        "choices": ["文学", "文章", "漢字", "英語"],
+        "answer": "文学"
+      },
+      {
+        "reading": "おし",
+        "meaning": "to teach",
+        "before": "大学で文学を",
+        "after": "えています",
+        "choices": ["教", "習", "考", "研"],
+        "answer": "教"
+      }
+    ]
   }
 };
 (function () {
